@@ -96,7 +96,7 @@ class Car:
         return addNoise(self.vel, velNoiseRate, velNoiseReal)
 
 
-class CarControl:
+class CarPID:
     def __init__(self):
         self.pidX = PID(p=10, i=2.5, d=1.8, stackSize=5)
         self.pidY = PID(p=10, i=2.5, d=1.8, stackSize=5)
