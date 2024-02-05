@@ -23,7 +23,7 @@ class Vector2D:
         self.x = x
         self.y = y
     def __str__(self):
-        return f"({self.x}, {self.y})"
+        return f"({self.x:.2f}, {self.y:.2f})"
     def __add__(self, other):
         if isinstance(other, Vector2D):
             return Vector2D(self.x + other.x, self.y + other.y)
@@ -50,11 +50,13 @@ class Vector2D:
         if isinstance(other, Vector2D):
             return self.x * other.x + self.y * other.y
         raise ValueError("Unsupported operand type for dot product")
+    def len(self):
+        return self.rho()
     def rho(self):
         return math.sqrt(self.x**2 + self.y**2)
     def alpha(self):
         return math.atan2(self.y, self.x)
-    def norm(self):
+    def normalize(self):
         return self/self.rho()
     def rhoLimit(self, value:float):
         alpha, rho = toPolar(self.x, self.y)
@@ -104,3 +106,13 @@ class TimeCallQue:
             else:
                 break
         self.nowTime = tarTime
+        
+def standardize(inputArray:list[float]):
+    num = np.array(inputArray, dtype=float) # 将元组转换为 NumPy 数组
+    avg = np.mean(num) # 计算均值和标准差
+    stdDeviation = np.std(num)
+    standardized = (num - avg) / stdDeviation # 标准化处理
+    return list(standardized)
+
+# def reContribute(inputArray:list[float]):
+    

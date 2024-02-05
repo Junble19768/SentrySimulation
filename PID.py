@@ -95,6 +95,10 @@ class Car:
         velNoiseReal = 0.02
         return addNoise(self.vel, velNoiseRate, velNoiseReal)
 
+    def measurePos(self):
+        posNoiseRate = 0
+        posNoiseReal = 0.04
+        return addNoise(self.pos, posNoiseRate, posNoiseReal)
 
 class CarPID:
     def __init__(self):
@@ -109,7 +113,7 @@ class CarPID:
         self.pidY.setTarget(vel.y)
         
 class Obstacle:
-    def __init__(self, line:(Vector2D), rad:float=0.25, speed:float=0.6):
+    def __init__(self, line:tuple[Vector2D,...]=(), rad:float=0.25, speed:float=0.6):
         self.rad = rad
         self.line = line
         self.speed = speed
@@ -125,7 +129,7 @@ class Obstacle:
             tar = self.line[i]
             while dis > 0:
                 if (tar-self.nowPos).rho() >= dis:
-                    self.nowPos = self.nowPos + (tar-self.nowPos).norm()*dis
+                    self.nowPos = self.nowPos + (tar-self.nowPos).normalize()*dis
                     dis = 0
                 else:
                     dis -= (tar-self.nowPos).rho()
@@ -134,6 +138,54 @@ class Obstacle:
                     i = (i+1)%self.size
                     tar = self.line[i]
 
+class RandObstacle(Obstacle): 
+    def __init__(self, 
+                 simSize:tuple[float], 
+                 nowPos:Vector2D=None, 
+                 rad:float=0.25, 
+                 speed:float=0.6):
+        self.rad = rad
+        self.maxSpeed = speed
+        self.nowPos = Vector2D()
+        self.speed = Vector2D()
+        self.cnt = 0.0
+        self.preAcc = Vector2D()
+        self.simSize = simSize
+        if nowPos == None:
+            self.nowPos.x = random.uniform(0, simSize[0])
+            self.nowPos.y = random.uniform(0, simSize[1])
+        else:
+            self.nowPos = nowPos
+    
+    def step(self, t:float):
+        maxAcc = self.maxSpeed
+        acc = Vector2D(random.uniform(-1,1), random.uniform(-1,1)).normalize()*maxAcc
+        if self.cnt <= 0:
+            self.cnt = random.uniform(0, 3)
+            self.preAcc = Vector2D(random.uniform(-1,1), random.uniform(-1,1)).normalize()*maxAcc
+        self.cnt -= t
+        
+        acc = acc + self.preAcc*0.2
+        acc.rhoLimit(maxAcc)
+        if (self.speed + acc*t).len() > self.maxSpeed:
+            acc = Vector2D(0, 0)
+        self.nowPos = self.nowPos + self.speed*t + acc*(t**2)*0.5
+        self.speed = self.speed + acc*t
+        
+        if self.nowPos.x < 0.1:
+            self.nowPos.x = 0.1
+            self.speed.x = -self.speed.x
+        if self.nowPos.x > self.simSize[0]-0.1:
+            self.nowPos.x = self.simSize[0]-0.1
+            self.speed.x = -self.speed.x
+        if self.nowPos.y < 0.1:
+            self.nowPos.y = 0.1
+            self.speed.y = -self.speed.y
+        if self.nowPos.y > self.simSize[1]-0.1:
+            self.nowPos.y = self.simSize[1]-0.1
+            self.speed.y = -self.speed.y
+            
+            
 
 if __name__ == '__main__':
     TARGET_VEL = 1  # 期望速度

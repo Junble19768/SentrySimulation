@@ -1,35 +1,24 @@
-import pygame
-import sys
+import numpy as np
 
-# Initialize Pygame
-pygame.init()
+def standardize_tuple(input_tuple):
+    # 将元组转换为 NumPy 数组
+    input_array = np.array(input_tuple, dtype=float)
+    
+    # 计算均值和标准差
+    mean_value = np.mean(input_array)
+    std_deviation = np.std(input_array)
+    
+    # 标准化处理
+    standardized_array = (input_array - mean_value) / std_deviation
+    
+    # 将 NumPy 数组转换回元组
+    standardized_tuple = tuple(standardized_array)
+    
+    return standardized_tuple
 
-# Set up display
-width, height = 800, 600
-screen = pygame.display.set_mode((width, height))
-pygame.display.set_caption("Mouse Click Example")
+# 示例用法
+original_tuple = (1.0, 2.0, 3.0, 4.0, 5.0)
+standardized_result = standardize_tuple(original_tuple)
 
-# Set up colors
-white = (255, 255, 255)
-
-# Main game loop
-running = True
-while running:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
-        elif event.type == pygame.MOUSEBUTTONDOWN:
-            if event.button == 1:  # Left mouse button
-                print("Left mouse button clicked at", event.pos)
-            elif event.button == 3:  # Right mouse button
-                print("Right mouse button clicked at", event.pos)
-
-    # Fill the screen with white
-    screen.fill(white)
-
-    # Update the display
-    pygame.display.flip()
-
-# Quit Pygame
-pygame.quit()
-sys.exit()
+print("Original Tuple:", original_tuple)
+print("Standardized Tuple:", standardized_result)
